@@ -36,7 +36,6 @@ class App extends React.Component {
     this.setState({
       model
     });
-    console.log("Model successfully loaded!");
     message.success("Model successfully loaded!");
   }
 
