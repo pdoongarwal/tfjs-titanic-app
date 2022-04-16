@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import * as tf from "@tensorflow/tfjs";
 import { message } from "antd";
 
 import PassengerForm from "./PassengerForm";
 
-const getAgeCategory = age => {
+const getAgeCategory = (age) => {
   let ageCategory = 0;
   if (age > 60) {
     ageCategory = 7;
@@ -25,28 +25,26 @@ const getAgeCategory = age => {
   return ageCategory;
 };
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+function App() {
+  const [model, updateModel] = useState();
 
-  async componentDidMount() {
-    const model = await tf.loadLayersModel("/trainedModel/model.json");
-    this.setState({
-      model
-    });
-    message.success("Model successfully loaded!");
-  }
+  useEffect(() => {
+    const loadModel = async () => {
+      const model = await tf.loadLayersModel("/trainedModel/model.json");
+      updateModel(model);
+      message.success("Model successfully loaded!");
+    };
 
-  predict = values => {
-    const { model } = this.state;
+    loadModel();
+  }, []);
+
+  const predict = (values) => {
     const { pclass, age, gender, sibsp, parch, embarked } = values;
 
     const ageCategory = getAgeCategory(age);
 
     const data = tf.tensor2d([
-      [pclass, gender, ageCategory, sibsp, parch, 0, 7, embarked]
+      [pclass, gender, ageCategory, sibsp, parch, 0, 7, embarked],
     ]);
 
     const prediction = model.predict(data).dataSync()[0];
@@ -56,9 +54,7 @@ class App extends React.Component {
     );
   };
 
-  render() {
-    return <PassengerForm onSubmit={this.predict} />;
-  }
+  return <PassengerForm onSubmit={predict} />;
 }
 
 export default App;
